@@ -21,8 +21,8 @@ México.
 # ======================================================================
 
 COMPANY_NAME = "Jofra Sistemas y Equipos"
-COMPANY_OWNER = "Francisco Cantú"
-COMPANY_OWNER_EMAIL = "francisco.cantu.jofra@gmail.com"
+COMPANY_OWNER = "Del equipo de Jofra"
+COMPANY_OWNER_EMAIL = "contacto.jofra@gmail.com"
 COMPANY_PITCH_ONE_LINER = (
     "Jofra instala paneles solares industriales llave en mano que recortan "
     "hasta 98% el recibo de CFE, con retorno de inversión en 3 a 5 años."
@@ -55,6 +55,11 @@ REGLA DE ORO — CERO INVENCIÓN DE DATOS:
 # Ordenados de mayor a menor potencial (el Lead Finder usa los primeros).
 
 TARGET_SECTORS: list[str] = [
+    # Cadenas de farmacias, centros médicos y laboratorios (refrigeración de vacunas y medicamentos 24/7)
+    "Farmacias y cadenas farmacéuticas",
+    "Centros médicos y laboratorios clínicos",
+    "Sistemas de refrigeración comercial e industrial",
+    "Cámaras frigoríficas y congelación industrial",
     # Manufactura y autopartes (consumo alto y continuo)
     "Manufactura y autopartes",
     "Plantas de ensamble",
