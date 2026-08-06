@@ -1,0 +1,39 @@
+# requirements.txt
+# Jofra Sistemas y Equipos - Motor de Prospección B2B
+# Fase 1: nucleo (FastAPI, DB, Webhooks). Se incluyen ya las dependencias
+# de fases posteriores para congelar el entorno una sola vez.
+
+# --- Core / Fase 1 ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+sqlalchemy>=2.0.30
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+python-dotenv>=1.0.1
+httpx>=0.27.0
+brotli>=1.1.0       # descompresion de respuestas 'br' (DuckDuckGo, etc.)
+zstandard>=0.22.0   # descompresion 'zstd'
+
+# --- Fase 2: Scraping y Calificación ---
+playwright>=1.45.0
+beautifulsoup4>=4.12.3
+lxml>=5.2.0
+phonenumbers>=8.13.0
+pypdf>=4.2.0          # extraccion de texto de PDFs (licitaciones, CVs, padrones)
+openpyxl>=3.1.0      # reporte de leads en Excel (.xlsx) para el cliente
+dnspython>=2.6.0     # validacion de registros MX (motor OSINT propio)
+
+# --- Fase 3: Google Calendar ---
+google-api-python-client>=2.130.0
+google-auth>=2.30.0
+google-auth-oauthlib>=1.2.0
+tzdata>=2024.1        # base de zonas horarias IANA (requerida por zoneinfo en Windows)
+
+# --- Fase 4: Agentes ---
+google-adk>=1.0.0
+litellm>=1.40.0
+aiosqlite>=0.20.0     # driver async de SQLite para el DatabaseSessionService de ADK
+apscheduler
+jinja2>=3.1.0
+python-multipart>=0.0.9
+pandas>=2.0.0
