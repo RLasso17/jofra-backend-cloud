@@ -22,11 +22,11 @@ logger = logging.getLogger("jofra.daily_extraction")
 
 # Mapa de rotación de 31 días (un giro de búsqueda diferente cada día del mes)
 ROTATION_31_DAYS = {
-    1: {"sector": "Agroindustria y Frigoríficos", "locations": ["Hermosillo", "Culiacan", "Ciudad Obregon"], "titles": ["ceo", "director", "gerente de planta", "vp de operaciones"]},
-    2: {"sector": "Minería y Extractiva", "locations": ["Zacatecas", "Durango", "Chihuahua"], "titles": ["director general", "gerente de mantenimiento", "vp"]},
-    3: {"sector": "Textil y Calzado Industrial", "locations": ["Guadalajara", "Leon", "Puebla"], "titles": ["dueño", "fundador", "director de operaciones"]},
-    4: {"sector": "Automotriz y Metalmecánica", "locations": ["Monterrey", "Saltillo", "San Luis Potosi"], "titles": ["gerente de planta", "director industrial", "vp"]},
-    5: {"sector": "Química y Farmacéutica", "locations": ["Toluca", "Mexico City", "Cuernavaca"], "titles": ["director de operaciones", "gerente general"]},
+    1: {"sector": "Farmacias y Cadenas Farmacéuticas", "locations": ["Mexico City", "Guadalajara", "Monterrey"], "titles": ["director general", "gerente de infraestructura", "director de operaciones"]},
+    2: {"sector": "Centros Médicos, Hospitales y Laboratorios", "locations": ["Mexico City", "Puebla", "Querétaro"], "titles": ["director administrativo", "gerente de planta", "director de operaciones"]},
+    3: {"sector": "Sistemas de Refrigeración Comercial y Cámaras Frías", "locations": ["Hermosillo", "Culiacán", "Mérida"], "titles": ["director de operaciones", "gerente de mantenimiento", "ceo"]},
+    4: {"sector": "Agroindustria y Frigoríficos", "locations": ["Hermosillo", "Culiacan", "Ciudad Obregon"], "titles": ["ceo", "director", "gerente de planta", "vp de operaciones"]},
+    5: {"sector": "Minería y Extractiva", "locations": ["Zacatecas", "Durango", "Chihuahua"], "titles": ["director general", "gerente de mantenimiento", "vp"]},
     6: {"sector": "Plásticos y Empaques", "locations": ["Reynosa", "Tijuana", "Mexicali"], "titles": ["director de planta", "gerente de compras industrial"]},
     7: {"sector": "Alimentos y Bebidas Procesadas", "locations": ["Merida", "Veracruz", "Queretaro"], "titles": ["ceo", "director de mantenimiento", "gerente de planta"]},
     8: {"sector": "Metalurgia y Fundición", "locations": ["Monclova", "Torreon", "Puebla"], "titles": ["director de operaciones", "vp industrial"]},
