@@ -244,7 +244,7 @@
                         <thead>
                             <tr>
                                 <th><input type="checkbox" class="accent-blue-600" x-model="selectAll" @change="toggleAll()"></th>
-                                <th>ID</th><th>Empresa</th><th>Contacto</th><th>Puesto</th><th>Sector</th><th>Ciudad</th><th>Correo</th><th>Probabilidad</th><th>Estado</th><th>Enviado</th><th>Contestó</th><th>Reunión</th>
+                                <th>ID</th><th>Empresa</th><th>Contacto</th><th>Puesto</th><th>Sector</th><th>Ciudad</th><th>Correo</th><th>Probabilidad</th><th>Estado</th><th>Enviado</th><th>Contestó</th><th>Reunión</th><th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -263,6 +263,12 @@
                                     <td x-text="l.enviado"></td>
                                     <td x-text="l.contesto"></td>
                                     <td x-text="l.reunion"></td>
+                                    <td>
+                                        <button @click="markUrgent(l.id)" class="btn text-[0.68rem] py-1 px-2.5" :class="l.human_assigned ? 'btn-red' : 'btn-ghost border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100'">
+                                            <i class="fa-solid" :class="l.human_assigned ? 'fa-hand' : 'fa-user-gear'"></i>
+                                            <span x-text="l.human_assigned ? 'Human Manage ✋' : 'Tomar Control ✋'"></span>
+                                        </button>
+                                    </td>
                                 </tr>
                             </template>
                         </tbody>
@@ -435,7 +441,7 @@
                                 <i class="fa-solid" :class="activeLead?.human_assigned ? 'fa-hand' : 'fa-robot'"></i> 
                                 <span x-text="activeLead?.human_assigned ? 'Bot pausado. El chat es todo tuyo.' : (activeLead?.estado === 'ready_for_outreach' ? 'El bot enviará este borrador automáticamente.' : 'El bot está vigilando y responderá pronto.')"></span>
                             </div>
-                            <button x-show="!activeLead?.human_assigned && activeLead?.estado === 'in_conversation'" @click="markUrgent(activeLead.id)" class="btn btn-red text-xs py-1"><i class="fa-solid fa-fire"></i> Marcar Urgente (Tomar Control)</button>
+                            <button x-show="!activeLead?.human_assigned" @click="markUrgent(activeLead.id)" class="btn btn-red text-xs py-1"><i class="fa-solid fa-hand"></i> Human Manage (Tomar Control)</button>
                         </div>
                         
                         <div x-show="activeLead?.human_assigned">
@@ -723,7 +729,7 @@ function hubApp() {
             if (this.selectedLeads && this.selectedLeads.length > 0) {
                 window.location.href = '/admin/export-excel?ids=' + this.selectedLeads.join(',');
             } else {
-                alert('Por favor, selecciona al menos una casilla en la tabla para exportar.');
+                window.location.href = '/admin/export-excel';
             }
         },
 
