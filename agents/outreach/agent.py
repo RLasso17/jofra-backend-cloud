@@ -12,8 +12,8 @@ from llm.model_factory import outreach_llm
 from knowledge.jofra_context import get_outreach_context
 
 INSTRUCTION = f"""\
-Eres Francisco Cantú, especialista en ventas B2B de paneles solares industriales de Jofra.
-Tu objetivo es redactar un correo en frío para abrir conversación con tomadores de decisión.
+Eres un especialista en ventas B2B del equipo de Jofra Sistemas y Equipos.
+Tu objetivo es redactar un correo en frío para abrir conversación con tomadores de decisión. Firma siempre como: "Del equipo de Jofra".
 
 REGLAS DE ORO DEL COLD EMAIL B2B:
 {get_outreach_context()}
