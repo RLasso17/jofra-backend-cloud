@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jofra Hub — CRM & AI Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        /* === GLASSMORPHISM CARDS === */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        /* === SIDEBAR === */
+        .sidebar { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-right: 1px solid rgba(255,255,255,0.5); }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 14px; border-radius: 9px; cursor: pointer;
+            font-size: 0.83rem; font-weight: 500; color: #64748b;
+            transition: all 0.15s; border: 1px solid transparent;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.8); color: #0f172a; }
+        .nav-item.active { background: rgba(239, 246, 255, 0.7); color: #2563eb; border-color: rgba(191, 219, 254, 0.5); }
+
+        /* === CARDS === */
+        .card { @extend .glass; border-radius: 16px; }
+        .card-hover:hover { border-color: #93c5fd; box-shadow: 0 4px 16px rgba(37,99,235,0.1); transition: all 0.2s; }
+
+        /* === BADGES === */
+        .badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:0.68rem; font-weight:600; }
+        .badge-muy-alta { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; } /* Muy verde */
+        .badge-alta { background:#ecfccb; color:#4d7c0f; border:1px solid #d9f99d; } /* Tantito verde */
+        .badge-media { background:#fef9c3; color:#ca8a04; border:1px solid #fde68a; } /* Amarillo */
+        .badge-baja { background:#ffedd5; color:#c2410c; border:1px solid #fed7aa; } /* Tantito rojo */
+        .badge-muy-baja { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; } /* Muy rojo */
+        .badge-si { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; }
+        .badge-no { background:#f1f5f9; color:#94a3b8; border:1px solid #e2e8f0; }
+        .badge-sector { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+        .badge-ready { background:#eff6ff; color:#2563eb; }
+        .badge-conv { background:#fffbeb; color:#d97706; }
+        .badge-meeting { background:#dcfce7; color:#16a34a; }
+
+        /* === TABLE === */
+        thead th {
+            background: rgba(248, 250, 252, 0.8); backdrop-filter: blur(5px); position:sticky; top:0; z-index:5;
+            padding:11px 14px; font-size:0.7rem; font-weight:700;
+            color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em;
+            border-bottom:1px solid rgba(226, 232, 240, 0.8); white-space:nowrap;
+        }
+        tbody td { padding:11px 14px; font-size:0.81rem; color:#334155; border-bottom:1px solid rgba(241, 245, 249, 0.6); white-space:nowrap; }
+        tbody tr:hover { background: rgba(255,255,255,0.5); }
+        .id-mono { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.75rem; letter-spacing: -0.5px; color: #64748b; font-weight: 600; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0; }
+
+        /* === TOOLBAR BUTTONS === */
+        .btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:12px; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.2s; border:1px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color:#fff; border-color:#2563eb; }
+        .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); color:#fff; }
+        .btn-green:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-red { background: linear-gradient(135deg, #ef4444, #dc2626); color:#fff; }
+        .btn-red:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-ghost { background: rgba(255,255,255,0.6); color:#475569; border-color:#e2e8f0; }
+        .btn-ghost:hover { background: #fff; }
+
+        /* === FILTER INPUTS === */
+        .filter-select, .search-input {
+            background: rgba(255,255,255,0.6); border:1px solid rgba(226, 232, 240, 0.8); color:#334155;
+            border-radius:12px; padding:7px 12px; font-size:0.78rem;
+            outline:none; cursor:pointer; font-family:'Inter',sans-serif; backdrop-filter: blur(4px);
+        }
+        .filter-select:focus, .search-input:focus { border-color:#2563eb; background:#fff; }
+        .search-input { padding-left:34px; width:260px; }
+        .search-input::placeholder { color:#94a3b8; }
+
+        /* === KANBAN === */
+        .kanban-col { min-width:285px; max-width:300px; flex-shrink:0; }
+        .kanban-card { background: rgba(255,255,255,0.8); backdrop-filter: blur(8px); border:1px solid rgba(226, 232, 240, 0.8); border-radius:14px; padding:14px; cursor:pointer; transition:all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .kanban-card:hover { border-color:#93c5fd; transform: translateY(-2px); box-shadow:0 6px 16px rgba(37,99,235,0.1); }
+        .kanban-card.human-mode { border-color:#f59e0b; background: rgba(254, 252, 232, 0.9); }
+        .kanban-col-header { background: rgba(248, 250, 252, 0.7); backdrop-filter: blur(8px); border:1px solid rgba(226, 232, 240, 0.8); border-radius:12px; padding:10px 14px; margin-bottom:12px; }
+
+        /* === STATUS DOT === */
+        .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+        .dot-green { background:#22c55e; box-shadow:0 0 6px rgba(34,197,94,0.6); animation:pulse-g 2s infinite; }
+        .dot-yellow { background:#f59e0b; box-shadow:0 0 6px rgba(245,158,11,0.6); animation:pulse-y 2s infinite; }
+        .dot-gray { background:#cbd5e1; }
+        @keyframes pulse-g { 0%,100% { box-shadow:0 0 6px rgba(34,197,94,0.6); } 50% { box-shadow:0 0 12px rgba(34,197,94,0.9); } }
+        @keyframes pulse-y { 0%,100% { box-shadow:0 0 6px rgba(245,158,11,0.5); } 50% { box-shadow:0 0 12px rgba(245,158,11,0.8); } }
+
+        /* === PROGRESS === */
+        .prog-bg { background: rgba(241, 245, 249, 0.8); border-radius:4px; height:8px; }
+        .prog-fill { border-radius:4px; height:8px; transition:width 0.5s; }
+
+        /* === KPI CARDS === */
+        .kpi-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border:1px solid rgba(226, 232, 240, 0.8); border-radius:16px; padding:22px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .kpi-card:hover { box-shadow:0 6px 20px rgba(0,0,0,0.08); border-color:#93c5fd; transition:all 0.2s; }
+
+        /* === CHAT === */
+        .chat-user { background:linear-gradient(135deg,#2563eb,#4f46e5); color:#fff; border-radius:18px 18px 4px 18px; padding:10px 15px; max-width:85%; align-self:flex-end; font-size:0.84rem; box-shadow: 0 2px 8px rgba(37,99,235,0.2); }
+        .chat-bot { background: rgba(248, 250, 252, 0.9); border:1px solid #e2e8f0; color:#334155; border-radius:18px 18px 18px 4px; padding:10px 15px; max-width:85%; align-self:flex-start; font-size:0.84rem; }
+        .chat-lead { background: rgba(254, 243, 199, 0.9); border:1px solid #fde68a; color:#92400e; border-radius:18px 18px 18px 4px; padding:10px 15px; max-width:85%; align-self:flex-start; font-size:0.84rem; }
+
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(203, 213, 225, 0.8); border-radius:10px; }
+        ::-webkit-scrollbar-thumb:hover { background:rgba(148, 163, 184, 0.8); }
+
+        .section-title { font-size:1.1rem; font-weight:700; color:#0f172a; }
+        .section-sub { font-size:0.78rem; color:#94a3b8; margin-top:2px; }
+        .chip { display:inline-flex; align-items:center; gap:5px; background:rgba(241, 245, 249, 0.8); border:1px solid rgba(226, 232, 240, 0.8); border-radius:20px; padding:4px 12px; font-size:0.72rem; font-weight:600; color:#64748b; cursor:pointer; transition:all 0.2s; backdrop-filter: blur(4px); }
+        .chip:hover { background:rgba(239, 246, 255, 0.8); border-color:#bfdbfe; color:#2563eb; }
+    </style>
+</head>
+<body x-data="hubApp()" x-init="initData()">
+
+<div class="flex h-screen overflow-hidden">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="w-56 flex-shrink-0 flex flex-col justify-between sidebar py-4 px-3">
+        <div>
+            <div class="flex items-center gap-2 px-2 mb-6">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-sm font-bold text-white shadow">J</div>
+                <div>
+                    <div class="text-sm font-bold text-slate-800 leading-none">Jofra Hub</div>
+                    <div class="text-xs text-slate-400 leading-none mt-0.5">AI Command Center</div>
+                </div>
+            </div>
+
+            <!-- TOGGLE DEL SISTEMA AUTONOMO -->
+            <div class="mb-5 px-3 py-2 bg-slate-50 rounded-xl border border-slate-200 shadow-inner">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-[0.68rem] font-bold text-slate-500 uppercase tracking-widest">Motor IA</span>
+                    <button @click="toggleSystem()" 
+                            class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none shadow-sm"
+                            :class="systemActive ? 'bg-green-500' : 'bg-red-500'">
+                        <span class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform"
+                              :class="systemActive ? 'translate-x-5' : 'translate-x-1'"></span>
+                    </button>
+                </div>
+                <div class="flex items-center mt-2">
+                    <span class="inline-block h-2 w-2 rounded-full mr-1" :class="systemActive ? 'bg-green-500' : 'bg-red-500'"></span>
+                    <span class="text-xs font-semibold" :class="systemActive ? 'text-green-700' : 'text-red-600'" x-text="systemActive ? 'Prendido (Autónomo)' : 'Apagado'"></span>
+                </div>
+            </div>
+            <nav class="space-y-1">
+                <div @click="tab='database'" :class="tab==='database'?'active':''" class="nav-item"><i class="fa-solid fa-table-cells w-4 text-center"></i> Base de Datos</div>
+                <div @click="tab='kanban'" :class="tab==='kanban'?'active':''" class="nav-item"><i class="fa-solid fa-columns w-4 text-center"></i> Kanban de Ventas</div>
+                <div @click="tab='kpis'" :class="tab==='kpis'?'active':''" class="nav-item"><i class="fa-solid fa-chart-line w-4 text-center"></i> KPIs</div>
+                <div @click="tab='agents'" :class="tab==='agents'?'active':''" class="nav-item"><i class="fa-solid fa-robot w-4 text-center"></i> Agent Hub</div>
+                <div x-show="currentUser?.role === 'admin'" @click="tab='users'; fetchUsers();" :class="tab==='users'?'active':''" class="nav-item text-amber-600 font-bold bg-amber-50/50"><i class="fa-solid fa-user-shield w-4 text-center"></i> Usuarios (Admin)</div>
+            </nav>
+
+            <div class="mt-4 px-1" x-show="kpis">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Progreso Global (En Vivo)</p>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">Leads totales</span><span class="text-blue-600 font-bold text-sm" x-text="kpis?.total || 0"></span></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">Correos enviados</span><span class="text-indigo-600 font-bold text-sm" x-text="kpis?.sent || 0"></span></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">Respuestas</span><span class="text-amber-600 font-bold text-sm" x-text="kpis?.replied || 0"></span></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">Citas agendadas</span><span class="text-emerald-600 font-bold text-sm" x-text="kpis?.meetings || 0"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER USUARIO -->
+        <div class="pt-3 border-t border-slate-200/60" x-show="currentUser">
+            <div class="flex items-center justify-between">
+                <div class="truncate">
+                    <p class="text-xs font-bold text-slate-800 truncate" x-text="currentUser?.username"></p>
+                    <p class="text-[0.65rem] text-slate-400 uppercase font-semibold" x-text="currentUser?.role === 'admin' ? '⚡ Administrador' : '👤 Operador'"></p>
+                </div>
+                <button @click="logout()" class="text-slate-400 hover:text-red-500 text-xs p-1" title="Cerrar Sesión"><i class="fa-solid fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden p-4 gap-4">
+
+        <!-- ======================== DATABASE ======================== -->
+        <div x-show="tab==='database'" class="flex-1 flex flex-col gap-4 min-h-0">
+            <div class="card glass p-5 flex flex-col gap-3 flex-1 min-h-0">
+                <div class="flex justify-between items-start flex-wrap gap-3">
+                    <div><div class="section-title"><i class="fa-solid fa-table-cells text-blue-600 mr-2"></i>Base de Datos de Leads</div><div class="section-sub">Toda tu información centralizada.</div></div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" x-model="searchQuery" class="search-input" placeholder="Buscar por empresa o nombre...">
+                        </div>
+                        <input type="date" x-model="filterDate" class="filter-select text-slate-500" title="Filtrar por fecha">
+                        <select x-model="filterSector" class="filter-select">
+                            <option value="all">Sector: Todos</option>
+                            <template x-for="s in uniqueSectors" :key="s">
+                                <option :value="s" x-text="s"></option>
+                            </template>
+                        </select>
+                        <select x-model="filterProb" class="filter-select">
+                            <option value="all">Probabilidad: Todas</option>
+                            <option value="Muy Alta">Muy Alta</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Media">Media</option>
+                            <option value="Baja">Baja</option>
+                            <option value="Muy Baja">Muy Baja</option>
+                        </select>
+                        <select x-model="filterStatus" class="filter-select">
+                            <option value="all">Estado: Todos</option>
+                            <option value="new">New</option>
+                            <option value="ready_for_outreach">Ready for Outreach</option>
+                            <option value="in_conversation">In Conversation</option>
+                            <option value="meeting_scheduled">Meeting Scheduled</option>
+                            <option value="discarded">Discarded</option>
+                        </select>
+                        <button class="btn btn-green shadow-sm" @click="exportExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-auto rounded-xl border border-slate-100">
+                    <table class="w-full min-w-max">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" class="accent-blue-600" x-model="selectAll" @change="toggleAll()"></th>
+                                <th>ID</th><th>Empresa</th><th>Contacto</th><th>Puesto</th><th>Sector</th><th>Ciudad</th><th>Correo</th><th>Probabilidad</th><th>Estado</th><th>Enviado</th><th>Contestó</th><th>Reunión</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="l in filteredLeads" :key="l.id">
+                                <tr>
+                                    <td><input type="checkbox" class="accent-blue-600" :value="l.id" x-model="selectedLeads"></td>
+                                    <td><span class="id-mono" x-text="'#' + String(l.id).padStart(4, '0')"></span></td>
+                                    <td class="font-semibold text-slate-800" x-text="l.empresa"></td>
+                                    <td x-text="l.contacto"></td>
+                                    <td class="text-slate-400" x-text="l.puesto"></td>
+                                    <td><span class="badge badge-sector" x-text="l.sector"></span></td>
+                                    <td x-text="l.ciudad"></td>
+                                    <td class="text-blue-600" x-text="l.correo"></td>
+                                    <td><span :class="getProbBadge(l.prob)" x-text="l.prob"></span></td>
+                                    <td><span class="badge badge-no" x-text="l.estado"></span></td>
+                                    <td x-text="l.enviado"></td>
+                                    <td x-text="l.contesto"></td>
+                                    <td x-text="l.reunion"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================== KANBAN ======================== -->
+        <div x-show="tab==='kanban'" class="flex-1 flex flex-col min-h-0">
+            <div class="card p-5 flex-1 flex flex-col min-h-0">
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+                    <div><div class="section-title"><i class="fa-solid fa-columns text-indigo-600 mr-2"></i>Kanban de Ventas</div><div class="section-sub">Mueve leads de etapa visualmente. Da clic para ver el hilo y responder.</div></div>
+                    <div class="flex gap-2">
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" x-model="searchQuery" class="search-input" placeholder="Buscar en Kanban...">
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-x-auto relative">
+                    <div class="flex gap-4 pb-2" style="min-height:420px">
+
+                        <!-- Listos -->
+                        <div class="kanban-col">
+                            <div class="kanban-col-header"><div class="flex justify-between items-center"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ready for Outreach</span></div></div>
+                            <div class="space-y-2 overflow-y-auto max-h-[70vh] pr-1">
+                                <template x-for="lead in filteredLeads.filter(l=>l.estado==='ready_for_outreach' && l.enviado==='No')" :key="lead.id">
+                                    <div class="kanban-card" @click="openThread(lead)">
+                                        <div class="flex justify-between items-start mb-2"><span class="badge badge-sector text-xs" x-text="lead.sector"></span></div>
+                                        <p class="text-sm font-bold text-slate-800 mb-0.5" x-text="lead.empresa"></p>
+                                        <p class="text-xs text-slate-500 mb-2" x-text="lead.contacto + ' · ' + lead.ciudad"></p>
+                                        <p class="text-xs text-slate-400 italic leading-relaxed line-clamp-2 mb-2" x-text="'Icebreaker: ' + lead.icebreaker"></p>
+                                        <button @click.stop="openEmailPreview(lead)" class="btn btn-ghost text-[0.65rem] py-1 px-2 w-full justify-center border-slate-200" x-show="lead.draft_subject">
+                                            <i class="fa-regular fa-envelope"></i> Ver Correo a Enviar
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Enviados (Waiting Reply) -->
+                        <div class="kanban-col">
+                            <div class="kanban-col-header" style="border-color:#bfdbfe;background:rgba(239, 246, 255, 0.8)"><div class="flex justify-between items-center"><span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Enviados (Sent) 📨</span></div></div>
+                            <div class="space-y-2 overflow-y-auto max-h-[70vh] pr-1">
+                                <template x-for="lead in filteredLeads.filter(l=>l.estado==='ready_for_outreach' && l.enviado==='Sí')" :key="lead.id">
+                                    <div class="kanban-card" style="border-color:#93c5fd;" @click="openThread(lead)">
+                                        <div class="flex justify-between items-start mb-2"><span class="badge badge-sector text-xs" x-text="lead.sector"></span></div>
+                                        <p class="text-sm font-bold text-slate-800 mb-0.5" x-text="lead.empresa"></p>
+                                        <p class="text-xs text-slate-500 mb-2" x-text="lead.contacto + ' · ' + lead.ciudad"></p>
+                                        <div class="mt-2 text-[0.65rem] text-slate-400 text-center font-semibold">
+                                            <i class="fa-solid fa-paper-plane mr-1"></i> Enviado. Esperando respuesta...
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- En Conversación -->
+                        <div class="kanban-col" style="min-width:340px;max-width:360px">
+                            <div class="kanban-col-header" style="border-color:#fde68a;background:rgba(254, 252, 232, 0.7)"><div class="flex justify-between items-center"><span class="text-xs font-bold text-amber-500 uppercase tracking-wider">En Conversación (Bot)</span></div></div>
+                            <div class="space-y-3 overflow-y-auto pr-1 max-h-[70vh]">
+                                <template x-for="lead in filteredLeads.filter(l=>l.estado==='in_conversation' && !l.human_assigned)" :key="lead.id">
+                                    <div class="kanban-card" @click="openThread(lead)">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="badge badge-sector text-xs" x-text="lead.sector"></span>
+                                        </div>
+                                        <p class="text-sm font-bold text-slate-800 mb-0.5" x-text="lead.empresa"></p>
+                                        <p class="text-xs text-slate-500 mb-2" x-text="lead.contacto"></p>
+                                        <div class="mt-2 text-xs text-slate-400 text-center">
+                                            <i class="fa-solid fa-clock mr-1"></i> El bot responderá pronto...
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Human Manage -->
+                        <div class="kanban-col" style="min-width:340px;max-width:360px">
+                            <div class="kanban-col-header" style="border-color:#f59e0b;background:rgba(254, 243, 199, 0.8)"><div class="flex justify-between items-center"><span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Human Manage ✋</span></div></div>
+                            <div class="space-y-3 overflow-y-auto pr-1 max-h-[70vh]">
+                                <template x-for="lead in filteredLeads.filter(l=>l.estado==='in_conversation' && l.human_assigned)" :key="lead.id">
+                                    <div class="kanban-card human-mode">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="badge badge-sector text-xs" x-text="lead.sector"></span>
+                                            <span class="text-xs text-amber-600 font-bold bg-amber-100 px-2 py-0.5 rounded"><i class="fa-solid fa-hand mr-1"></i>Bot Pausado</span>
+                                        </div>
+                                        <p class="text-sm font-bold text-slate-800 mb-0.5" x-text="lead.empresa"></p>
+                                        <p class="text-xs text-slate-500 mb-2" x-text="lead.contacto"></p>
+                                        <div class="flex gap-2">
+                                            <button @click="openThread(lead)" class="flex-1 btn btn-primary text-xs py-1.5">
+                                                <i class="fa-solid fa-comments"></i> Responder
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Reunión Agendada -->
+                        <div class="kanban-col">
+                            <div class="kanban-col-header" style="border-color:#bbf7d0;background:rgba(240, 253, 244, 0.8)"><div class="flex justify-between items-center"><span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Reunión Agendada 🏆</span></div></div>
+                            <div class="space-y-2 overflow-y-auto max-h-[70vh] pr-1">
+                                <template x-for="lead in filteredLeads.filter(l=>l.estado==='meeting_scheduled')" :key="lead.id">
+                                    <div class="kanban-card" style="border-color:#86efac;" @click="openThread(lead)">
+                                        <div class="flex justify-between items-start mb-2"><span class="badge badge-sector text-xs" x-text="lead.sector"></span><i class="fa-solid fa-calendar-check text-emerald-500 text-sm"></i></div>
+                                        <p class="text-sm font-bold text-slate-800 mb-0.5" x-text="lead.empresa"></p>
+                                        <p class="text-xs text-slate-500" x-text="lead.contacto"></p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Rechazados -->
+                        <div class="kanban-col">
+                            <div class="kanban-col-header" style="border-color:#fecaca;background:rgba(254, 242, 242, 0.8)"><div class="flex justify-between items-center"><span class="text-xs font-bold text-red-600 uppercase tracking-wider">Rechazados 🚫</span></div></div>
+                            <div class="space-y-2 overflow-y-auto max-h-[70vh] pr-1">
+                                <template x-for="lead in filteredLeads.filter(l=>l.estado==='discarded')" :key="lead.id">
+                                    <div class="kanban-card opacity-80" style="border-color:#fca5a5;" @click="openThread(lead)">
+                                        <div class="flex justify-between items-start mb-2"><span class="badge badge-sector text-xs" x-text="lead.sector"></span></div>
+                                        <p class="text-sm font-bold text-slate-800 mb-0.5 line-through" x-text="lead.empresa"></p>
+                                        <p class="text-xs text-slate-500" x-text="lead.contacto"></p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- THREAD MODAL -->
+            <div x-show="showThreadModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
+                <div class="bg-white rounded-2xl w-full max-w-2xl h-[80vh] flex flex-col shadow-2xl">
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-slate-800" x-text="'Hilo con ' + activeLead?.empresa"></h3>
+                            <p class="text-xs text-slate-500" x-text="activeLead?.correo"></p>
+                        </div>
+                        <button @click="showThreadModal=false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                    
+                    <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 bg-slate-50">
+                        <div x-show="currentThread.length === 0 && activeLead?.estado !== 'ready_for_outreach'" class="text-center text-slate-400 text-sm mt-10">No hay mensajes en este hilo.</div>
+                        
+                        <!-- Vista de Borrador en Preparación -->
+                        <div x-show="activeLead?.estado === 'ready_for_outreach' && activeLead?.enviado !== 'Sí'" class="flex justify-end mt-4">
+                            <div class="chat-bot w-full border border-blue-200 bg-blue-50 relative shadow-sm">
+                                <div class="text-[0.65rem] font-bold text-blue-600 mb-2 uppercase tracking-wide flex items-center"><i class="fa-solid fa-pen-nib mr-1"></i> Borrador en Preparación</div>
+                                <div class="font-bold text-slate-800 mb-1 text-sm" x-text="'Asunto: ' + (activeLead?.draft_subject || 'Pendiente...')"></div>
+                                <div class="whitespace-pre-wrap text-slate-600 mt-2 mb-3 text-sm" x-text="activeLead?.draft_body || 'El modelo está redactando el borrador...'"></div>
+                                <button @click="openEmailPreview(activeLead)" class="btn btn-ghost text-xs py-1.5 border-blue-200 w-full justify-center bg-white hover:bg-blue-50 hover:text-blue-600 font-semibold shadow-sm transition-all">
+                                    <i class="fa-solid fa-edit"></i> Editar Borrador (Sin pasarlo a Human Care)
+                                </button>
+                            </div>
+                        </div>
+
+                        <template x-for="msg in currentThread" :key="msg.id">
+                            <div :class="msg.direction==='inbound' ? 'flex justify-start' : 'flex justify-end'">
+                                <div :class="msg.direction==='inbound' ? 'chat-lead' : (msg.sender_type==='human_agent' ? 'chat-user' : 'chat-bot')">
+                                    <div class="text-[0.65rem] opacity-70 mb-1" x-text="msg.date + ' • ' + msg.sender_type"></div>
+                                    <div class="whitespace-pre-wrap" x-text="msg.body"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <div class="p-4 border-t border-slate-100 bg-white rounded-b-2xl">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-xs font-bold" :class="activeLead?.human_assigned ? 'text-amber-600' : 'text-slate-500'">
+                                <i class="fa-solid" :class="activeLead?.human_assigned ? 'fa-hand' : 'fa-robot'"></i> 
+                                <span x-text="activeLead?.human_assigned ? 'Bot pausado. El chat es todo tuyo.' : (activeLead?.estado === 'ready_for_outreach' ? 'El bot enviará este borrador automáticamente.' : 'El bot está vigilando y responderá pronto.')"></span>
+                            </div>
+                            <button x-show="!activeLead?.human_assigned && activeLead?.estado === 'in_conversation'" @click="markUrgent(activeLead.id)" class="btn btn-red text-xs py-1"><i class="fa-solid fa-fire"></i> Marcar Urgente (Tomar Control)</button>
+                        </div>
+                        
+                        <div x-show="activeLead?.human_assigned">
+                            <textarea x-model="humanReply" rows="3" placeholder="Escribe tu respuesta humana... El RAG aprenderá de ella." class="w-full text-sm rounded-lg border border-slate-200 p-3 resize-none outline-none focus:border-blue-500 mb-2"></textarea>
+                            <div class="flex justify-end gap-2">
+                                <button @click="sendHumanReply()" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EMAIL PREVIEW MODAL -->
+            <div x-show="showEmailModal" x-transition.opacity class="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
+                <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl">
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
+                        <div>
+                            <h3 class="font-bold text-slate-800"><i class="fa-regular fa-envelope text-blue-600 mr-2"></i>Borrador de Correo Frío</h3>
+                            <p class="text-xs text-slate-500" x-text="'Para: ' + activeLead?.correo"></p>
+                        </div>
+                        <button @click="showEmailModal=false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                    <div class="p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase mb-1">Asunto</div>
+                        <input type="text" x-model="activeLeadDraftSubject" class="w-full text-sm font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 outline-none focus:border-blue-500 bg-transparent">
+                        <div class="text-xs font-bold text-slate-400 uppercase mb-1">Cuerpo del Mensaje</div>
+                        <textarea x-model="activeLeadDraftBody" rows="8" class="w-full text-sm text-slate-700 leading-relaxed border border-slate-200 rounded p-2 outline-none focus:border-blue-500 resize-none"></textarea>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end gap-2">
+                            <button @click="showEmailModal=false" class="btn btn-ghost text-xs py-1.5 px-4">Cancelar</button>
+                            <button @click="saveDraftEmail()" class="btn btn-primary text-xs py-1.5 px-4"><i class="fa-solid fa-save"></i> Guardar Cambios</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================== KPIs ======================== -->
+        <div x-show="tab==='kpis'" class="flex-1 overflow-y-auto">
+            <div class="section-title mb-5"><i class="fa-solid fa-chart-line text-blue-600 mr-2"></i>Panel de KPIs en Tiempo Real</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+                <div class="kpi-card text-center">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Leads Calificados</div>
+                    <div class="text-3xl font-bold text-blue-600" x-text="kpis?.qualified || 0"></div>
+                    <div class="text-xs text-slate-500 mt-1">Listos para contacto</div>
+                </div>
+                <div class="kpi-card text-center">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Leads Descartados</div>
+                    <div class="text-3xl font-bold text-red-500" x-text="kpis?.discarded || 0"></div>
+                    <div class="text-xs text-slate-500 mt-1">Por filtros RAG</div>
+                </div>
+                <div class="kpi-card text-center">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Citas Agendadas</div>
+                    <div class="text-3xl font-bold text-emerald-500" x-text="kpis?.meetings || 0"></div>
+                    <div class="text-xs text-slate-500 mt-1">Cerradas por Agente 4</div>
+                </div>
+                <div class="kpi-card text-center">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Pipeline</div>
+                    <div class="text-3xl font-bold text-amber-500" x-text="formatMoney(kpis?.pipeline_value || 0)"></div>
+                    <div class="text-xs text-slate-500 mt-1">Oportunidades abiertas</div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-4">
+                <div class="kpi-card">
+                    <div class="section-title text-base mb-4"><i class="fa-solid fa-ranking-star text-amber-500 mr-2"></i>Conversión de Respuesta por Sector</div>
+                    <div class="space-y-4">
+                        <template x-for="s in (kpis?.sectors || [])" :key="s.sector">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1"><span class="font-medium text-slate-600" x-text="s.sector"></span><span class="text-emerald-600 font-bold" x-text="s.conv + '% ('+s.replied+' leads)'"></span></div>
+                                <div class="prog-bg"><div class="prog-fill bg-emerald-400" :style="'width:' + Math.min(s.conv * 10, 100) + '%'"></div></div>
+                            </div>
+                        </template>
+                        <div x-show="!(kpis?.sectors?.length)" class="text-sm text-slate-400 text-center py-4">No hay datos suficientes aún.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- ======================== GESTIÓN DE USUARIOS (ADMIN ONLY) ======================== -->
+        <div x-show="tab==='users' && currentUser?.role === 'admin'" class="flex-1 overflow-y-auto">
+            <div class="card p-6">
+                <div class="flex justify-between items-center mb-5">
+                    <div>
+                        <div class="section-title"><i class="fa-solid fa-user-shield text-amber-500 mr-2"></i>Gestión de Usuarios y Roles</div>
+                        <div class="section-sub">Administra quiénes tienen acceso al Command Center y verifica registros.</div>
+                    </div>
+                    <div class="badge badge-sector text-xs font-bold px-3 py-1.5"><i class="fa-solid fa-key mr-1"></i> Código Máster: PASSO</div>
+                </div>
+                
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-slate-50 text-left">
+                                <th class="p-3 text-xs font-bold text-slate-500 uppercase">ID</th>
+                                <th class="p-3 text-xs font-bold text-slate-500 uppercase">Usuario</th>
+                                <th class="p-3 text-xs font-bold text-slate-500 uppercase">Correo</th>
+                                <th class="p-3 text-xs font-bold text-slate-500 uppercase">Rol</th>
+                                <th class="p-3 text-xs font-bold text-slate-500 uppercase">Estado</th>
+                                <th class="p-3 text-xs font-bold text-slate-500 uppercase">Fecha Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="u in usersList" :key="u.id">
+                                <tr class="border-t border-slate-100 hover:bg-slate-50/50">
+                                    <td class="p-3 text-xs font-mono text-slate-400" x-text="'#' + u.id"></td>
+                                    <td class="p-3 text-sm font-bold text-slate-800" x-text="u.username"></td>
+                                    <td class="p-3 text-xs text-blue-600 font-medium" x-text="u.email"></td>
+                                    <td class="p-3">
+                                        <span class="badge" :class="u.role === 'admin' ? 'badge-conv font-bold text-amber-700 bg-amber-100' : 'badge-no'" x-text="u.role.toUpperCase()"></span>
+                                    </td>
+                                    <td class="p-3">
+                                        <span class="badge badge-si text-xs"><i class="fa-solid fa-check-circle mr-1"></i> Aprobado</span>
+                                    </td>
+                                    <td class="p-3 text-xs text-slate-400" x-text="u.created_at"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ======================== LOGIN / REGISTER OVERLAY MODAL ======================== -->
+<div x-show="!currentUser" x-transition.opacity class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl border border-slate-100 relative">
+        <div class="text-center mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 mx-auto flex items-center justify-center text-xl font-extrabold text-white shadow-lg mb-3">J</div>
+            <h2 class="text-xl font-extrabold text-slate-800 mb-1">Jofra Command Center</h2>
+            <p class="text-xs text-slate-500">Inicia sesión para controlar la prospección autónoma</p>
+        </div>
+
+        <div class="flex border-b border-slate-100 mb-6 text-sm font-bold">
+            <button @click="authMode='login'" class="flex-1 py-2 text-center border-b-2 transition-all" :class="authMode==='login' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400'">Iniciar Sesión</button>
+            <button @click="authMode='register'" class="flex-1 py-2 text-center border-b-2 transition-all" :class="authMode==='register' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400'">Registrarse</button>
+        </div>
+
+        <!-- Google Direct Login Button -->
+        <button @click="loginWithGoogle()" class="w-full btn btn-ghost justify-center py-2.5 mb-4 border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 rounded-xl">
+            <i class="fa-brands fa-google text-red-500 mr-2 text-sm"></i> Continuar con Cuenta de Google
+        </button>
+
+        <div class="relative flex py-2 items-center mb-4">
+            <div class="flex-grow border-t border-slate-100"></div>
+            <span class="flex-shrink mx-4 text-[0.65rem] text-slate-400 font-bold uppercase">o con usuario</span>
+            <div class="flex-grow border-t border-slate-100"></div>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Usuario / Email</label>
+                <input type="text" x-model="authForm.username" placeholder="ej. francisco" class="w-full text-xs rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500">
+            </div>
+            <div x-show="authMode==='register'">
+                <label class="block text-xs font-bold text-slate-600 mb-1">Correo Electrónico</label>
+                <input type="email" x-model="authForm.email" placeholder="correo@empresa.com" class="w-full text-xs rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Contraseña</label>
+                <input type="password" x-model="authForm.password" placeholder="••••••••" class="w-full text-xs rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500">
+            </div>
+            <div class="pt-1">
+                <label class="block text-xs font-bold text-amber-600 mb-1"><i class="fa-solid fa-key mr-1"></i> Código Especial Admin (Opcional)</label>
+                <input type="text" x-model="authForm.special_code" placeholder="Introduce 'PASSO' para Admin total" class="w-full text-xs rounded-xl border border-amber-300 bg-amber-50/40 p-3 outline-none focus:border-amber-500 font-mono font-bold uppercase tracking-wider text-amber-900">
+            </div>
+
+            <button @click="submitAuth()" class="w-full btn btn-primary justify-center py-3 text-xs font-bold rounded-xl mt-4 shadow-md">
+                <span x-text="authMode==='login' ? 'Acceder al Sistema' : 'Crear Cuenta'"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+    </main>
+</div>
+
+<script>
+function hubApp() {
+    return {
+        tab: 'kanban',
+        systemActive: false,
+        leads: [],
+        usersList: [],
+        searchQuery: '',
+        filterDate: '',
+        filterSector: 'all',
+        filterProb: 'all',
+        filterStatus: 'all',
+        kpis: null,
+        agentLogs: [],
+        
+        // Auth State
+        currentUser: null,
+        authMode: 'login',
+        authForm: {
+            username: '',
+            email: '',
+            password: '',
+            special_code: ''
+        },
+
+        // Modal State
+        showThreadModal: false,
+        showEmailModal: false,
+        activeLead: null,
+        activeLeadDraftSubject: '',
+        activeLeadDraftBody: '',
+        currentThread: [],
+        humanReply: '',
+        
+        selectAll: false,
+        selectedLeads: [],
+        
+        get uniqueSectors() {
+            const sectors = new Set(this.leads.map(l => l.sector).filter(s => s && s !== 'N/A' && s !== ''));
+            return Array.from(sectors).sort();
+        },
+
+        get filteredLeads() {
+            let result = this.leads;
+            if (this.searchQuery.trim() !== '') {
+                const q = this.searchQuery.toLowerCase();
+                result = result.filter(l => 
+                    (l.empresa && l.empresa.toLowerCase().includes(q)) ||
+                    (l.contacto && l.contacto.toLowerCase().includes(q))
+                );
+            }
+            if (this.filterProb !== 'all') {
+                result = result.filter(l => l.prob === this.filterProb);
+            }
+            if (this.filterStatus !== 'all') {
+                result = result.filter(l => l.estado === this.filterStatus);
+            }
+            if (this.filterSector !== 'all') {
+                result = result.filter(l => l.sector === this.filterSector);
+            }
+            if (this.filterDate !== '') {
+                // Parse date YYYY-MM-DD to compare with updated_at / date strings
+                result = result.filter(l => {
+                    if (!l.actualizado) return true;
+                    // Format matching: if filterDate is 2026-08-05, check if lead updated date contains relevant month/day
+                    const d = new Date(this.filterDate);
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    const monthStr = monthNames[d.getUTCMonth()];
+                    const dayStr = String(d.getUTCDate()).padStart(2, '0');
+                    return l.actualizado.includes(monthStr) && l.actualizado.includes(dayStr);
+                });
+            }
+            
+            // Si no hay busqueda, ordenar por ID de forma predeterminada
+            if (this.searchQuery.trim() === '') {
+                result = result.sort((a, b) => a.id - b.id);
+            }
+            
+            return result;
+        },
+        
+        toggleAll() {
+            if (this.selectAll) {
+                this.selectedLeads = this.leads.map(l => l.id.toString());
+            } else {
+                this.selectedLeads = [];
+            }
+        },
+        
+        getProbBadge(prob) {
+            const p = (prob || '').toLowerCase();
+            if(p === 'muy alta') return 'badge badge-muy-alta';
+            if(p === 'alta') return 'badge badge-alta';
+            if(p === 'media') return 'badge badge-media';
+            if(p === 'baja') return 'badge badge-baja';
+            if(p === 'muy baja') return 'badge badge-muy-baja';
+            return 'badge badge-media';
+        },
+        
+        formatMoney(amount) {
+            return '$' + parseFloat(amount).toLocaleString('es-MX');
+        },
+        
+        exportExcel() {
+            if (this.selectedLeads && this.selectedLeads.length > 0) {
+                window.location.href = '/admin/export-excel?ids=' + this.selectedLeads.join(',');
+            } else {
+                alert('Por favor, selecciona al menos una casilla en la tabla para exportar.');
+            }
+        },
+
+        async initData() {
+            // Cargar usuario guardado en sesión local si existe
+            const savedUser = localStorage.getItem('jofra_user');
+            if (savedUser) {
+                try { this.currentUser = JSON.parse(savedUser); } catch(e){}
+            }
+
+            await this.fetchLeads();
+            this.fetchKpis();
+            this.fetchLogs();
+            if (this.currentUser?.role === 'admin') {
+                this.fetchUsers();
+            }
+            
+            try {
+                const res = await fetch('/api/system-state');
+                const data = await res.json();
+                this.systemActive = data.is_active;
+            } catch(e) { console.error("Error al cargar estado:", e); }
+            
+            // Auto refresh en vivo cada 10 segundos para contadores y KPIs en tiempo real
+            setInterval(() => {
+                this.fetchLeads();
+                this.fetchKpis();
+                this.fetchLogs();
+            }, 10000);
+        },
+
+        async submitAuth() {
+            const endpoint = this.authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.authForm)
+                });
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    this.currentUser = data.user;
+                    localStorage.setItem('jofra_user', JSON.stringify(data.user));
+                    if (data.user.role === 'admin') this.fetchUsers();
+                    alert(`¡Bienvenido ${data.user.username}! ${data.user.role === 'admin' ? '👑 Acceso Administrador Activado.' : ''}`);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Error al autenticar');
+            }
+        },
+
+        async loginWithGoogle() {
+            try {
+                const res = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: 'rlassoa17@gmail.com',
+                        name: 'Rodrigo Lasso',
+                        special_code: this.authForm.special_code
+                    })
+                });
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    this.currentUser = data.user;
+                    localStorage.setItem('jofra_user', JSON.stringify(data.user));
+                    if (data.user.role === 'admin') this.fetchUsers();
+                    alert(`¡Sesión iniciada con Google! ${data.user.role === 'admin' ? '⚡ Rol Administrador Confirmado.' : ''}`);
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        },
+
+        logout() {
+            this.currentUser = null;
+            localStorage.removeItem('jofra_user');
+            this.tab = 'kanban';
+        },
+
+        async fetchUsers() {
+            try {
+                let res = await fetch('/api/admin/users');
+                let data = await res.json();
+                this.usersList = data.users || [];
+            } catch(e) { console.error(e); }
+        },
+
+        async toggleSystem() {
+            try {
+                const res = await fetch('/api/toggle-system', { method: 'POST' });
+                const data = await res.json();
+                this.systemActive = data.is_active;
+                this.fetchKpis();
+            } catch(e) { console.error("Error al cambiar estado:", e); }
+        },
+
+        async fetchLeads() {
+            try {
+                let res = await fetch('/api/leads');
+                let data = await res.json();
+                this.leads = data.leads;
+            } catch (e) { console.error(e); }
+        },
+
+        async fetchKpis() {
+            try {
+                let res = await fetch('/api/kpis');
+                this.kpis = await res.json();
+            } catch (e) { console.error(e); }
+        },
+
+        async fetchLogs() {
+            try {
+                let res = await fetch('/api/agent-logs');
+                let data = await res.json();
+                this.agentLogs = data.logs;
+            } catch (e) { console.error(e); }
+        },
+
+        openEmailPreview(lead) {
+            this.activeLead = lead;
+            this.activeLeadDraftSubject = lead.draft_subject;
+            this.activeLeadDraftBody = lead.draft_body;
+            this.showEmailModal = true;
+        },
+        
+        async saveDraftEmail() {
+            if(!this.activeLead) return;
+            try {
+                let res = await fetch('/api/leads/' + this.activeLead.id + '/draft', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        draft_subject: this.activeLeadDraftSubject,
+                        draft_body: this.activeLeadDraftBody
+                    })
+                });
+                let data = await res.json();
+                if(data.status === 'ok') {
+                    let l = this.leads.find(x => x.id === this.activeLead.id);
+                    if (l) {
+                        l.draft_subject = this.activeLeadDraftSubject;
+                        l.draft_body = this.activeLeadDraftBody;
+                    }
+                    this.showEmailModal = false;
+                } else {
+                    alert("Error al guardar el borrador");
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Hubo un error al guardar');
+            }
+        },
+
+        async openThread(lead) {
+            this.activeLead = lead;
+            this.currentThread = [];
+            this.humanReply = '';
+            this.showThreadModal = true;
+            try {
+                let res = await fetch('/api/leads/' + lead.id + '/thread');
+                let data = await res.json();
+                this.currentThread = data.thread;
+            } catch (e) { console.error(e); }
+        },
+
+        async markUrgent(lead_id) {
+            try {
+                await fetch('/api/leads/' + lead_id + '/mark-urgent', {method: 'POST'});
+                this.activeLead.human_assigned = true;
+                let l = this.leads.find(x => x.id === lead_id);
+                if (l) l.human_assigned = true;
+            } catch (e) { console.error(e); }
+        },
+
+        async sendHumanReply() {
+            if(!this.humanReply.trim() || !this.activeLead) return;
+            try {
+                let res = await fetch('/hub/human-reply?lead_id=' + this.activeLead.id + '&reply_body=' + encodeURIComponent(this.humanReply), {
+                    method: 'POST'
+                });
+                let data = await res.json();
+                if(data.sent || data.note) {
+                    alert('Respuesta enviada y bot pausado.');
+                    this.showThreadModal = false;
+                    this.fetchLeads();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Hubo un error de conexión');
+            }
+        }
+    }
+}
+</script>
+</body>
+</html>
