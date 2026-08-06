@@ -195,7 +195,7 @@ async def generate_outreach_email(lead_id: int) -> dict:
     with session_scope() as db:
         lead = crud.get_lead_by_id(db, lead_id)
         if lead is None:
-            return {"subject": "Ahorro de energía para su empresa", "body": "Estimado Director,\n\n¿Le interesaría explorar opciones para reducir el costo de CFE en su empresa?\n\nFrancisco Cantú\nJofra Sistemas y Equipos"}
+            return {"subject": "Ahorro de energía para su empresa", "body": "Estimado Director,\n\n¿Le interesaría explorar opciones para reducir el costo de CFE en su empresa?\n\nDel equipo de Jofra\nJofra Sistemas y Equipos"}
         brief = _build_lead_brief(lead)
         company = lead.company_name or "su empresa"
         contact = lead.contact_name or "Estimado Director"
@@ -238,7 +238,7 @@ async def generate_outreach_email(lead_id: int) -> dict:
         f"{icebreaker} En Jofra instalamos proyectos solares industriales llave en mano "
         f"que recortan hasta un 98% el recibo de CFE, con ROI en 3 a 5 años y deducción 100% de ISR.\n\n"
         f"¿Tendría 15 minutos esta semana para revisar proyecciones financieras con base en su recibo actual?\n\n"
-        f"Francisco Cantú\nJofra Sistemas y Equipos"
+        f"Del equipo de Jofra"
     )
     return {"subject": subject, "body": body}
 
